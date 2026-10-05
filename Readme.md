@@ -4,7 +4,8 @@ Sistema web desenvolvido com **React, NestJS e MySQL**, com suporte a execução
 
 ## Tecnologias
 
-# Backend
+### Backend
+
 - Node.js
 - NestJS
 - TypeScript
@@ -12,7 +13,8 @@ Sistema web desenvolvido com **React, NestJS e MySQL**, com suporte a execução
 - JWT
 - Bcrypt
 
-# Frontend
+### Frontend
+
 - React
 - TypeScript
 - Vite
@@ -24,8 +26,8 @@ Sistema web desenvolvido com **React, NestJS e MySQL**, com suporte a execução
 
 Existem duas formas de executar o projeto:
 
-- **Docker** — 
-- **Localmente** — 
+- **Docker** — recomendado para executar toda a aplicação.
+- **Localmente** — recomendado para desenvolvimento.
 
 ---
 
@@ -51,7 +53,7 @@ O Docker utiliza as configurações definidas no `docker-compose.yml`.
 
 O backend deve utilizar:
 
-```env (do backend)
+```env
 DB_HOST=mysql
 DB_PORT=3306
 ```
@@ -102,7 +104,7 @@ docker compose down -v
 
 ---
 
-# 💻 Rodando localmente
+# Rodando localmente
 
 Para executar sem Docker, é necessário ter:
 
@@ -128,7 +130,7 @@ Exemplo:
 ```env
 PORT=3000
 
-DB_HOST=mysql
+DB_HOST=localhost
 DB_PORT=3306
 DB_USERNAME=root
 DB_PASSWORD=root
@@ -177,7 +179,7 @@ http://localhost:5173
 
 # Usuário inicial
 
-Para fim de usabilida, o seed cria automaticamente um usuário administrador quando ele ainda não existe.
+Para facilitar a usabilidade, o seed cria automaticamente um usuário administrador quando ele ainda não existe.
 
 ```text
 Email: admin@wenlock.com
