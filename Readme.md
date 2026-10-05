@@ -107,11 +107,14 @@ cd WenLock
 
 O Docker utiliza as configurações definidas no `docker-compose.yml`.
 
-O backend deve utilizar:
+Para o funcionamento correto crie um arquivo backend/.env e preencha-o, por exemplo:
 
 ```env
 DB_HOST=mysql
 DB_PORT=3306
+DB_USERNAME=root
+DB_PASSWORD=root
+DB_DATABASE=wenlock
 ```
 
 ### 4. Suba o projeto
