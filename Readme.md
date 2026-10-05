@@ -143,6 +143,11 @@ Backend:
 http://localhost:3000
 ```
 
+A documentação do Swagger pode ser acessada em 
+```
+http://localhost:3000/docs
+```
+
 ---
 
 ## Parar o projeto
@@ -221,6 +226,11 @@ Backend:
 
 ```text
 http://localhost:3000
+```
+
+A documentação do Swagger pode ser acessada em 
+```
+http://localhost:3000/docs
 ```
 
 ---
