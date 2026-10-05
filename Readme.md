@@ -40,7 +40,7 @@ A configuração do `DB_HOST` depende de onde o backend e o MySQL estão sendo e
 ### Executando tudo localmente
 
 Se o **backend e o MySQL estiverem instalados e rodando na máquina**
-```
+
 
 Neste caso, o usuário precisa **criar o banco de dados da aplicação manualmente** no MySQL.
 
