@@ -26,8 +26,8 @@ Sistema web desenvolvido com **React, NestJS e MySQL**, com suporte a execução
 
 Existem duas formas de executar o projeto:
 
-- **Docker** — recomendado para executar toda a aplicação.
-- **Localmente** — recomendado para desenvolvimento.
+- **Docker** — recomendado.
+- **Localmente** — exige mais dependências e ações.
 
 ---
 
@@ -39,14 +39,10 @@ A configuração do `DB_HOST` depende de onde o backend e o MySQL estão sendo e
 
 ### Executando tudo localmente
 
-Se o **backend e o MySQL estiverem instalados e rodando na máquina**, utilize:
-
-```env
-DB_HOST=localhost
-DB_PORT=3306
+Se o **backend e o MySQL estiverem instalados e rodando na máquina**
 ```
 
-Nesse caso, o usuário precisa **criar o banco de dados da aplicação manualmente** no MySQL.
+Neste caso, o usuário precisa **criar o banco de dados da aplicação manualmente** no MySQL.
 
 Exemplo:
 
@@ -64,6 +60,8 @@ DB_PASSWORD=root
 DB_DATABASE=wenlock
 ```
 
+Este é apenas um exemplo, a porta pode ser diferente caso a 3306 já esteja sendo utilizada, o DB_HOST, DB_USERNAME, O DB_PASSWORD e DB_DATABASE devem corresponder aos dados reais.
+
 > O banco `wenlock` precisa existir antes de iniciar o backend.
 
 ---
@@ -72,14 +70,7 @@ DB_DATABASE=wenlock
 
 Quando o backend e o MySQL estiverem dentro do Docker, **não utilize `localhost` para acessar o banco**.
 
-Utilize o nome do serviço definido no `docker-compose.yml`:
-
-```env
-DB_HOST=mysql
-DB_PORT=3306
-```
-
-Exemplo:
+Utilize o nome do serviço definido no `docker-compose.yml`, exemplo:
 
 ```env
 DB_HOST=mysql
