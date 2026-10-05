@@ -196,11 +196,11 @@ DB_USERNAME=root
 DB_PASSWORD=root
 DB_DATABASE=wenlock
 
-JWT_SECRET=sua_chave_secreta
+JWT_SECRET=chave_secreta
 ```
 
 > **Importante:** ao executar o backend localmente, use `DB_HOST=localhost`.  
-> Se o backend estiver dentro do Docker, use `DB_HOST=mysql`.
+> Se o backend estiver dentro do Docker, use `DB_HOST=mysql`. Este JWT_SECRET é apenas um exemplo, caso ele mude deve ser feito a mudança no campo correspondente em docker-compose.yml. 
 
 Execute o seed:
 
