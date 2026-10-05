@@ -31,7 +31,72 @@ Existem duas formas de executar o projeto:
 
 ---
 
-## Com Docker
+# Banco de dados
+
+O projeto utiliza **MySQL**.
+
+A configuração do `DB_HOST` depende de onde o backend e o MySQL estão sendo executados.
+
+### Executando tudo localmente
+
+Se o **backend e o MySQL estiverem instalados e rodando na máquina**, utilize:
+
+```env
+DB_HOST=localhost
+DB_PORT=3306
+```
+
+Nesse caso, o usuário precisa **criar o banco de dados da aplicação manualmente** no MySQL.
+
+Exemplo:
+
+```sql
+CREATE DATABASE wenlock;
+```
+
+Depois configure o `.env`:
+
+```env
+DB_HOST=localhost
+DB_PORT=3306
+DB_USERNAME=root
+DB_PASSWORD=root
+DB_DATABASE=wenlock
+```
+
+> O banco `wenlock` precisa existir antes de iniciar o backend.
+
+---
+
+### Executando com Docker
+
+Quando o backend e o MySQL estiverem dentro do Docker, **não utilize `localhost` para acessar o banco**.
+
+Utilize o nome do serviço definido no `docker-compose.yml`:
+
+```env
+DB_HOST=mysql
+DB_PORT=3306
+```
+
+Exemplo:
+
+```env
+DB_HOST=mysql
+DB_PORT=3306
+DB_USERNAME=root
+DB_PASSWORD=root
+DB_DATABASE=wenlock
+```
+
+> Dentro do Docker, `mysql` é o nome do container/serviço do banco.  
+> `localhost` nesse caso aponta para o próprio container do backend, e não para o MySQL.
+
+O Docker cria o banco automaticamente através da configuração do `docker-compose.yml`.
+
+---
+
+# Com Docker
 
 ### 1. Pré-requisitos
 
@@ -57,8 +122,6 @@ O backend deve utilizar:
 DB_HOST=mysql
 DB_PORT=3306
 ```
-
-> Dentro do Docker, `mysql` é o nome do serviço do banco.
 
 ### 4. Suba o projeto
 
@@ -119,6 +182,12 @@ cd backend
 npm install
 ```
 
+Crie o banco de dados no MySQL:
+
+```sql
+CREATE DATABASE wenlock;
+```
+
 Configure o arquivo:
 
 ```text
@@ -138,6 +207,9 @@ DB_DATABASE=wenlock
 
 JWT_SECRET=sua_chave_secreta
 ```
+
+> **Importante:** ao executar o backend localmente, use `DB_HOST=localhost`.  
+> Se o backend estiver dentro do Docker, use `DB_HOST=mysql`.
 
 Execute o seed:
 
