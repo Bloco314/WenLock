@@ -1,8 +1,15 @@
 import Sidebar from "@/components/Sidebar";
 import TopBar from "@/components/TopBar";
+import { Input } from "@/components/Input";
 import { usersApi } from "@/services/users.api";
 import { UpdateUserPayload, User } from "@/types";
 import { useEffect, useState } from "react";
+import {
+  isValidName,
+  isValidEmail,
+  isValidRegistration,
+  isValidPassword,
+} from "@/utils/validation.utils";
 
 import EditIcon from "../assets/edit.svg";
 import EyeIcon from "../assets/eye.svg";
@@ -17,7 +24,7 @@ import skipBack from "../assets/skipBack.svg";
 import skipForward from "../assets/skipForward.svg";
 import xIcon from "../assets/x.svg";
 import emptySearch from "../assets/emptySearchImage.svg";
-import { Input } from "@/components/Input";
+import { errorToast, successToast, warningToast } from "@/utils/toast.utils";
 
 type pageMode = "LISTING" | "CREATING" | "EDITING" | "LISTING_SEARCH";
 
@@ -57,8 +64,8 @@ export default function UserControlPage() {
     id: 0,
   });
 
-  // visualazing
-  const [displayUser, setDisplayUser] = useState<User>()
+  // visualizing
+  const [displayUser, setDisplayUser] = useState<User>();
 
   async function loadUsers(
     currentMode = mode,
@@ -89,13 +96,41 @@ export default function UserControlPage() {
     }
   }, [page, mode]);
 
+  function isCreateFormValid(): boolean {
+    return (
+      name.trim() !== "" &&
+      isValidName(name) &&
+      email.trim() !== "" &&
+      isValidEmail(email) &&
+      registration.trim() !== "" &&
+      isValidRegistration(registration) &&
+      password !== "" &&
+      isValidPassword(password) &&
+      repeatPassword !== "" &&
+      password === repeatPassword
+    );
+  }
+
+  function isEditFormValid(): boolean {
+    return (
+      userEditInfo.name.trim() !== "" &&
+      isValidName(userEditInfo.name) &&
+      userEditInfo.email.trim() !== "" &&
+      isValidEmail(userEditInfo.email) &&
+      userEditInfo.registration.trim() !== "" &&
+      isValidRegistration(userEditInfo.registration) &&
+      isValidPassword(password) &&
+      isValidPassword(repeatPassword) &&
+      password === repeatPassword
+    );
+  }
+
   async function handleCreateUser(e: React.FormEvent) {
     e.preventDefault();
-
     setError("");
 
-    if (password !== repeatPassword) {
-      setError("As senhas não são iguais.");
+    if (isCreateFormValid()) {
+      setError("Formulario invalido.");
       return;
     }
 
@@ -109,9 +144,10 @@ export default function UserControlPage() {
         password,
       });
 
+      successToast("Cadastro Realizado!");
       setMode("LISTING");
     } catch (error) {
-      console.error("Erro ao cadastrar usuário:", error);
+      errorToast("Erro ao cadastrar usuário:" + error);
       setError("Não foi possível cadastrar o usuário.");
     } finally {
       setLoading(false);
@@ -121,20 +157,25 @@ export default function UserControlPage() {
   async function handleDelete(user: User) {
     try {
       await usersApi.delete(user.id);
-
+      successToast("Exclusão Realizada!");
       setUsers((currentUsers) =>
         currentUsers.filter((item) => item.id !== user.id),
       );
     } catch (error) {
-      console.error("Erro ao excluir usuário:", error);
+      errorToast("Erro ao excluir usuário:" + error);
     }
   }
 
   async function handleUpdateUser(e: React.FormEvent) {
     e.preventDefault();
+
+    if (isCreateFormValid()) {
+      setError("Formulario invalido.");
+      return;
+    }
+
     try {
       if (!userEditInfo) return;
-      console.log(userEditInfo);
       const payload: UpdateUserPayload = {
         email: userEditInfo.email,
         name: userEditInfo.name,
@@ -143,9 +184,11 @@ export default function UserControlPage() {
       };
 
       await usersApi.update(userEditInfo.id, payload);
+
+      successToast("Dados salvos com sucesso!");
       setMode("LISTING");
     } catch (error) {
-      console.error("Erro ao atualizar usuário:", error);
+      errorToast("Erro ao atualizar usuário:" + error);
     }
   }
 
@@ -180,7 +223,9 @@ export default function UserControlPage() {
 
         <div className="flex items-center justify-center ml-auto mr-4 gap-2">
           <button
-            onClick={() => {setShowDetailsModal(true), setDisplayUser(user)}}
+            onClick={() => {
+              (setShowDetailsModal(true), setDisplayUser(user));
+            }}
             className={buttonClassName}
           >
             <img
@@ -513,7 +558,15 @@ export default function UserControlPage() {
 
           <div className="grid grid-cols-2 gap-x-6 gap-y-5">
             <div>
-              <Input label="Nome completo" value={name} onChange={setName} />
+              <Input
+                label="Nome completo"
+                value={name}
+                onChange={(value) => {
+                  if (/^[A-Za-zÀ-ÖØ-öø-ÿ\s]*$/.test(value)) {
+                    setName(value);
+                  }
+                }}
+              />
 
               <p className="text-[10px] text-slate-600 text-right mt-1">
                 * Máx. 30 Caracteres
@@ -524,7 +577,11 @@ export default function UserControlPage() {
               <Input
                 label="Nº da matrícula"
                 value={registration}
-                onChange={setRegistration}
+                onChange={(value) => {
+                  if (/^\d*$/.test(value)) {
+                    setRegistration(value);
+                  }
+                }}
               />
 
               <p className="text-[10px] text-slate-600 text-right mt-1">
@@ -558,19 +615,23 @@ export default function UserControlPage() {
             <Input
               label="Senha"
               value={password}
-              onChange={setPassword}
+              onChange={(value) => {
+                if (/^[A-Za-z0-9]*$/.test(value) && value.length <= 6) {
+                  setPassword(value);
+                }
+              }}
               type="password"
-              eyeIcon={EyeIcon}
-              eyeSlash={EyeSlashIcon}
             />
 
             <Input
               label="Repetir Senha"
               value={repeatPassword}
-              onChange={setRepeatPassword}
+              onChange={(value) => {
+                if (/^[A-Za-z0-9]*$/.test(value) && value.length <= 6) {
+                  setRepeatPassword(value);
+                }
+              }}
               type="password"
-              eyeIcon={EyeIcon}
-              eyeSlash={EyeSlashIcon}
             />
           </div>
 
@@ -593,19 +654,13 @@ export default function UserControlPage() {
             </button>
 
             <button
-              disabled={
-                !name || !registration || !email || !password || !repeatPassword
-              }
+              disabled={!isCreateFormValid()}
               type="submit"
               className={`
                 h-12 px-10 rounded-md
                 font-semibold text-white
                 ${
-                  !name ||
-                  !registration ||
-                  !email ||
-                  !password ||
-                  !repeatPassword
+                  !isCreateFormValid()
                     ? "bg-gray-400 cursor-not-allowed"
                     : "bg-[#0290A4] hover:bg-[#00606D] cursor-pointer"
                 }
@@ -620,7 +675,9 @@ export default function UserControlPage() {
           ConfirmModal(
             "Deseja cancelar?",
             "Os dados inseridos não serão salvos",
-            () => setMode("LISTING"),
+            () => {
+              (setMode("LISTING"), warningToast("Cadastro cancelado"));
+            },
           )}
       </div>
     );
@@ -631,9 +688,11 @@ export default function UserControlPage() {
       <div className="ml-1 px-8 py-2">
         <div className="flex items-center text-xs text-slate-500 mb-2">
           <span>Usuários</span>
+
           <span className="mx-2">
             <img src={arrowRight} alt=">" className="w-2 h-2" />
           </span>
+
           <span>Editar Usuário</span>
         </div>
 
@@ -673,16 +732,20 @@ export default function UserControlPage() {
                 type="text"
                 placeholder="Insira o nome completo*"
                 value={userEditInfo?.name}
-                onChange={(e) =>
-                  setUserEditInfo((prev) => ({
-                    ...prev,
-                    name: e.target.value,
-                  }))
-                }
+                onChange={(e) => {
+                  const value = e.target.value;
+
+                  if (/^[A-Za-zÀ-ÖØ-öø-ÿ\s]*$/.test(value)) {
+                    setUserEditInfo((prev) => ({
+                      ...prev,
+                      name: value,
+                    }));
+                  }
+                }}
                 maxLength={30}
                 className="w-full h-12 px-3 bg-[#F4F4F4] border-b-2 border-transparent
-                rounded-sm outline-none text-slate-700 placeholder:text-slate-500
-                focus:border-[#0290A4]"
+              rounded-sm outline-none text-slate-700 placeholder:text-slate-500
+              focus:border-[#0290A4]"
               />
 
               <p className="text-[10px] text-slate-600 text-right mt-1">
@@ -695,20 +758,24 @@ export default function UserControlPage() {
                 type="text"
                 placeholder="Insira o Nº da matrícula"
                 value={userEditInfo?.registration}
-                onChange={(e) =>
-                  setUserEditInfo((prev) => ({
-                    ...prev,
-                    registration: e.target.value,
-                  }))
-                }
+                onChange={(e) => {
+                  const value = e.target.value;
+
+                  if (/^\d*$/.test(value)) {
+                    setUserEditInfo((prev) => ({
+                      ...prev,
+                      registration: value,
+                    }));
+                  }
+                }}
                 maxLength={10}
                 className="w-full h-12 px-3 bg-[#F4F4F4] border-b-2 border-transparent
-                rounded-sm outline-none text-slate-700 placeholder:text-slate-500
-                focus:border-[#0290A4]"
+              rounded-sm outline-none text-slate-700 placeholder:text-slate-500
+              focus:border-[#0290A4]"
               />
 
               <p className="text-[10px] text-slate-600 text-right mt-1">
-                * Mín. 4 Letras | * Máx. 10 Caracteres
+                * Mín. 4 Números | * Máx. 10 Caracteres
               </p>
             </div>
 
@@ -725,8 +792,8 @@ export default function UserControlPage() {
                 }
                 maxLength={40}
                 className="w-full h-12 px-3 bg-[#F4F4F4] border-b-2 border-transparent
-                rounded-sm outline-none text-slate-700 placeholder:text-slate-500
-                focus:border-[#0290A4]"
+              rounded-sm outline-none text-slate-700 placeholder:text-slate-500
+              focus:border-[#0290A4]"
               />
 
               <p className="text-[10px] text-slate-600 text-right mt-1">
@@ -749,10 +816,17 @@ export default function UserControlPage() {
                 type={showPassword ? "text" : "password"}
                 placeholder="Nova Senha"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+
+                  if (/^[A-Za-z0-9]*$/.test(value) && value.length <= 6) {
+                    setPassword(value);
+                  }
+                }}
+                maxLength={6}
                 className="w-full h-12 px-3 bg-[#F4F4F4] border-b-2 border-transparent
-                rounded-sm outline-none text-slate-700 placeholder:text-slate-500
-                focus:border-[#0290A4]"
+              rounded-sm outline-none text-slate-700 placeholder:text-slate-500
+              focus:border-[#0290A4]"
               />
 
               <button
@@ -773,10 +847,17 @@ export default function UserControlPage() {
                 type={showRepeatPassword ? "text" : "password"}
                 placeholder="Repetir Nova Senha"
                 value={repeatPassword}
-                onChange={(e) => setRepeatPassword(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+
+                  if (/^[A-Za-z0-9]*$/.test(value) && value.length <= 6) {
+                    setRepeatPassword(value);
+                  }
+                }}
+                maxLength={6}
                 className="w-full h-12 px-3 bg-[#F4F4F4] border-b-2 border-transparent
-                rounded-sm outline-none text-slate-700 placeholder:text-slate-500
-                focus:border-[#0290A4]"
+              rounded-sm outline-none text-slate-700 placeholder:text-slate-500
+              focus:border-[#0290A4]"
               />
 
               <button
@@ -800,23 +881,17 @@ export default function UserControlPage() {
               }}
               type="button"
               className="h-12 px-10 rounded-md border border-[#0B2B25]
-              bg-white text-slate-700 font-semibold
-              hover:bg-[#00606D40] transition"
+            bg-white text-slate-700 font-semibold
+            hover:bg-[#00606D40] transition"
             >
               Cancelar
             </button>
 
             <button
-              disabled={
-                !userEditInfo.name ||
-                !userEditInfo.registration ||
-                !userEditInfo.email
-              }
+              disabled={!isEditFormValid()}
               type="submit"
               className={`h-12 px-10 rounded-md font-semibold text-white ${
-                !userEditInfo.name ||
-                !userEditInfo.registration ||
-                !userEditInfo.email
+                !isEditFormValid()
                   ? "bg-gray-400 cursor-not-allowed"
                   : "bg-[#0290A4] hover:bg-[#00606D] cursor-pointer"
               }`}

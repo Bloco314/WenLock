@@ -1,4 +1,6 @@
 import { useState } from "react";
+import eyeIcon from "../assets/eye.svg";
+import eyeSlash from "../assets/eye_slash.svg";
 
 interface InputProps {
   label: string;
@@ -6,8 +8,6 @@ interface InputProps {
   onChange: (value: string) => void;
   error?: boolean;
   type?: "text" | "password";
-  eyeIcon?: string;
-  eyeSlash?: string;
 }
 
 export function Input({
@@ -16,8 +16,6 @@ export function Input({
   onChange,
   error = false,
   type = "text",
-  eyeIcon,
-  eyeSlash,
 }: InputProps) {
   const [showPassword, setShowPassword] = useState(false);
 

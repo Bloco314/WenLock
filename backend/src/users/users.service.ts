@@ -11,12 +11,15 @@ import { CreateUserDto } from './dto/create-user.dto.js';
 import { UpdateUserDto } from './dto/update-user.dto.js';
 import { UserResponseDto } from './dto/user-response.dto.js';
 import { LoginUserDto } from './dto/login-user.dto.js';
+import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly jwtService: JwtService,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<UserResponseDto> {
@@ -28,11 +31,17 @@ export class UsersService {
       throw new ConflictException('E-mail já cadastrado no sistema.');
     }
 
-    const newUser = this.userRepository.create(createUserDto);
+    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+
+    const newUser = this.userRepository.create({
+      ...createUserDto,
+      password: hashedPassword,
+    });
 
     const savedUser = await this.userRepository.save(newUser);
 
     const { password, ...userWithoutPassword } = savedUser;
+
     return userWithoutPassword;
   }
 
@@ -59,9 +68,8 @@ export class UsersService {
     id: number,
     updateUserDto: UpdateUserDto,
   ): Promise<UserResponseDto> {
-    const user = await this.userRepository.preload({
-      id,
-      ...updateUserDto,
+    const user = await this.userRepository.findOne({
+      where: { id },
     });
 
     if (!user) {
@@ -70,9 +78,18 @@ export class UsersService {
       );
     }
 
+    user.name = updateUserDto.name ?? user.name;
+    user.email = updateUserDto.email ?? user.email;
+    user.registration = updateUserDto.registration ?? user.registration;
+
+    if (updateUserDto.password?.trim()) {
+      user.password = await bcrypt.hash(updateUserDto.password, 10);
+    }
+
     const updatedUser = await this.userRepository.save(user);
 
     const { password, ...userWithoutPassword } = updatedUser;
+
     return userWithoutPassword;
   }
 
@@ -93,22 +110,29 @@ export class UsersService {
   async login(loginUserDto: LoginUserDto) {
     const { email, password } = loginUserDto;
 
-    const user = await this.userRepository.findOne({ where: { email } });
+    const user = await this.userRepository.findOne({
+      where: { email },
+    });
 
     if (!user) {
       throw new UnauthorizedException('E-mail/Matrícula ou senha inválidos.');
     }
 
-    const isPasswordValid = user.password === password;
+    const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
       throw new UnauthorizedException('E-mail/Matrícula ou senha inválidos.');
     }
 
+    const token = this.jwtService.sign({
+      sub: user.id,
+      email: user.email,
+    });
+
     const { password: _, ...userWithoutPassword } = user;
 
     return {
-      token: 'jwt-token-aqui',
+      token,
       user: userWithoutPassword,
     };
   }
@@ -192,7 +216,9 @@ export class UsersService {
       throw new Error('DEFAULT_PASSWORD não configurada.');
     }
 
-    user.password = defaultPassword;
+    const hashedPassword = await bcrypt.hash(defaultPassword, 10);
+
+    user.password = hashedPassword;
 
     await this.userRepository.save(user);
 

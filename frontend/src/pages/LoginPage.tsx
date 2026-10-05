@@ -2,15 +2,12 @@ import { useState, FormEvent } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useUserStore } from "@/stores/user.store";
 import { Logo } from "@/components/Logo";
-
-import eyeIcon from "../assets/eye.svg";
-import eyeSlash from "../assets/eye_slash.svg";
 import { Input } from "@/components/Input";
+import { errorToast, successToast } from "@/utils/toast.utils";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState<boolean>(false);
 
   const navigate = useNavigate();
 
@@ -25,8 +22,11 @@ export default function LoginPage() {
         password,
       });
 
+      successToast("Usuário logado com sucesso!");
       navigate("/home");
-    } catch {}
+    } catch {
+      errorToast("Usuário/Senha inválido(a)")
+    }
   };
 
   return (
@@ -59,8 +59,6 @@ export default function LoginPage() {
               value={password}
               onChange={setPassword}
               type="password"
-              eyeIcon={eyeIcon}
-              eyeSlash={eyeSlash}
               error={!!error}
             />
           </div>
@@ -68,14 +66,14 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="bg-[#0290A4] text-white rounded p-2 cursor-pointer disabled:opacity-50 mt-4"
+            className="bg-[#0290A4] text-white font-bold rounded p-2 cursor-pointer disabled:opacity-50 mt-4"
           >
             {loading ? "Entrando..." : "Entrar"}
           </button>
 
           <Link
             to="/retrieve-password"
-            className="text-[#0290A4] text-center cursor-pointer hover:text-[#00606D] text-sm mt-4"
+            className="text-[#0290A4] text-center font-bold cursor-pointer hover:text-[#00606D] text-sm mt-4"
           >
             Esqueci minha senha
           </Link>

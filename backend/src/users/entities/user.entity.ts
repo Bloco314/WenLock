@@ -11,21 +11,38 @@ export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ length: 100 })
+  @Column({
+    type: 'varchar',
+    length: 100,
+  })
   name: string;
 
-  @Column({ unique: true, length: 100 })
+  @Column({
+    type: 'varchar',
+    length: 100,
+    unique: true,
+  })
   email: string;
 
-  @Column({ unique: true, length: 30 })
+  @Column({
+    type: 'varchar',
+    length: 30,
+    unique: true,
+  })
   registration: string;
 
-  @Column()
+  @Column({
+    type: 'varchar',
+  })
   password: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({
+    type: 'datetime',
+  })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({
+    type: 'datetime',
+  })
   updatedAt: Date;
 }

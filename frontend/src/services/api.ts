@@ -15,33 +15,47 @@ class ApiService {
   ): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
 
+    const token = localStorage.getItem("token");
+
+    const headers = new Headers(options.headers);
+
+    headers.set("Content-Type", "application/json");
+
+    if (token) {
+      headers.set("Authorization", `Bearer ${token}`);
+    }
+
     let response: Response;
+
     try {
       response = await fetch(url, {
         ...options,
         credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          ...options.headers,
-        },
+        headers,
       });
     } catch {
       throw new Error("Erro de conexão. Verifique sua internet.");
     }
 
     let data: ApiResponse<unknown>;
+
     try {
       data = await response.json();
     } catch {
       const parseError = new Error(
         "Resposta inválida do servidor",
       ) as HttpError;
+
       parseError.status = response.status;
+
       throw parseError;
     }
 
     if (!response.ok || !data.success) {
-      const apiData = data as ApiResponse<unknown> & { error?: ApiError };
+      const apiData = data as ApiResponse<unknown> & {
+        error?: ApiError;
+      };
+
       const errorMessage =
         apiData.error?.message ||
         apiData.errors?.[0]?.message ||
@@ -49,10 +63,13 @@ class ApiService {
         "Requisição falhou";
 
       const requestError = new Error(errorMessage) as HttpError;
+
       requestError.status = response.status;
       requestError.code = apiData.error?.code || apiData.errors?.[0]?.code;
+
       requestError.details =
         apiData.error?.details || apiData.errors?.[0]?.details;
+
       throw requestError;
     }
 
@@ -60,7 +77,10 @@ class ApiService {
   }
 
   async get<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-    return this.request<T>(endpoint, { ...options, method: "GET" });
+    return this.request<T>(endpoint, {
+      ...options,
+      method: "GET",
+    });
   }
 
   async post<T>(
@@ -101,10 +121,20 @@ class ApiService {
 
   async delete(endpoint: string, options: RequestInit = {}): Promise<void> {
     const url = `${this.baseUrl}${endpoint}`;
+
+    const token = localStorage.getItem("token");
+
+    const headers = new Headers(options.headers);
+
+    if (token) {
+      headers.set("Authorization", `Bearer ${token}`);
+    }
+
     const response = await fetch(url, {
       ...options,
       method: "DELETE",
       credentials: "include",
+      headers,
     });
 
     if (!response.ok && response.status !== 204) {

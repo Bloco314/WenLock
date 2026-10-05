@@ -62,7 +62,7 @@ export default function TopBar() {
         <div className="w-6.5 h-6.5 absolute z-50 -right-2.5 -bottom-2.5 rounded-full flex items-center justify-center">
           <img
             src={openClose}
-            className="transition-transform duration-100 group-hover:rotate-180 w-6.5 h-6.5"
+            className="transition-transform duration-100 rotate-180 group-hover:rotate-0 w-6.5 h-6.5"
           />
         </div>
 

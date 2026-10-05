@@ -21,6 +21,9 @@ import {
   ApiUnauthorizedResponse,
   ApiParam,
 } from '@nestjs/swagger';
+import { UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
+import { ApiBearerAuth } from '@nestjs/swagger';
 import { UsersService } from './users.service.js';
 import { CreateUserDto } from './dto/create-user.dto.js';
 import { UpdateUserDto } from './dto/update-user.dto.js';
@@ -30,25 +33,19 @@ import { LoginResponseDto } from './dto/login-response.dto.js';
 import { UsersPaginationDto } from './dto/users-pagination.dto.js';
 import { UsersPaginationSearchDto } from './dto/user-pagination-search.dto.js';
 import { ResetPasswordDto } from './dto/reset-password.dto.js';
+import { Public } from '../auth/decorators/public.decorator.js';
 
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
 @ApiTags('users')
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  @Public()
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Autenticar usuário' })
-  @ApiOkResponse({
-    description: 'Login realizado com sucesso.',
-    type: LoginResponseDto,
-  })
-  @ApiUnauthorizedResponse({
-    description: 'Credenciais inválidas.',
-  })
-  @ApiBadRequestResponse({
-    description: 'Dados de entrada inválidos.',
-  })
   login(@Body() loginUserDto: LoginUserDto) {
     return this.usersService.login(loginUserDto);
   }
@@ -153,6 +150,7 @@ export class UsersController {
     return this.usersService.remove(+id);
   }
 
+  @Public()
   @Post('reset-password')
   @ApiOperation({
     summary: 'Redefinir senha do usuário',

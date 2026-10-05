@@ -1,6 +1,6 @@
 import { create } from "zustand";
-import { usersApi, type LoginPayload } from "@/services/users.api";
-import type { User } from "@/types";
+import { usersApi } from "@/services/users.api";
+import type { User, LoginPayload } from "@/types";
 
 interface UserState {
   user: User | null;
@@ -14,7 +14,7 @@ interface UserState {
 }
 
 export const useUserStore = create<UserState>((set) => ({
-  user: null,
+  user: JSON.parse(localStorage.getItem("user") || "null"),
   token: localStorage.getItem("token"),
   loading: false,
   error: null,
@@ -31,6 +31,7 @@ export const useUserStore = create<UserState>((set) => ({
       const { token, user } = response.data;
 
       localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
 
       set({
         token,
@@ -50,6 +51,7 @@ export const useUserStore = create<UserState>((set) => ({
 
   logout: () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
 
     set({
       user: null,
